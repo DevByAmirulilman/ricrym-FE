@@ -1,0 +1,20 @@
+{
+  "files": {
+    "main.css": "/static/css/main.f855e6bc.css",
+    "main.js": "/static/js/main.5c00a4f4.js",
+    "static/js/453.8422f4d9.chunk.js": "/static/js/453.8422f4d9.chunk.js",
+    "static/media/warrior.png": "/static/media/warrior.63b8d9c67d031d6df7ee.png",
+    "static/media/mage.jpg": "/static/media/mage.9986b30e32051bf04478.jpg",
+    "static/media/healer.jpg": "/static/media/healer.9d3919549e0038045604.jpg",
+    "static/media/archer.jpg": "/static/media/archer.0be8d504ad2969a09ec2.jpg",
+    "static/media/logo.svg": "/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
+    "index.html": "/index.html",
+    "main.f855e6bc.css.map": "/static/css/main.f855e6bc.css.map",
+    "main.5c00a4f4.js.map": "/static/js/main.5c00a4f4.js.map",
+    "453.8422f4d9.chunk.js.map": "/static/js/453.8422f4d9.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.f855e6bc.css",
+    "static/js/main.5c00a4f4.js"
+  ]
+}

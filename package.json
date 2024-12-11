@@ -1,6 +1,7 @@
 {
   "name": "wira-web",
   "version": "0.1.0",
+  "homepage": "https://devbyamirulilman.github.io/ricrym-FE",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.13.5",

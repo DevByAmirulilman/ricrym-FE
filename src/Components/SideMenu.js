@@ -37,7 +37,7 @@ export default function SideMenu({accountId,changeComponent}) {
         console.log(accountId.accountId);
       
         axios
-          .post(`http://localhost:5000/api/account/${accountId.accountId}`)
+          .post(`https://ricrym-be.onrender.com/api/account/${accountId.accountId}`)
           .then(function (response) {
             setData(response.data);
           })

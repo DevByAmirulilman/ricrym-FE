@@ -96,7 +96,7 @@ export default function SignUp({ open, handleClose }) {
     event.preventDefault();
     if (validateInputs()) {
       axios
-        .post("http://localhost:5000/api/register", formData)
+        .post("https://ricrym-be.onrender.com/api/register", formData)
         .then((response) => {
           setAccountId(response.data.user.id); // Assume API returns user ID
           setIsTwoFactorEnabled(true); // Enable 2FA view

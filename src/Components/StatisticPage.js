@@ -4,12 +4,14 @@ import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip, Legend, ArcElement } from "chart.js";
 import { Pie } from "react-chartjs-2";
 import axios from "axios";
+import LoadingComponet from "./LoadingComponet";
 
 // Register ChartJS components
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend, ArcElement);
 
 const StatisticsPage = ({ accountId }) => {
   const sessionId = localStorage.getItem("session_id");
+  const [isLoading, setIsLoading] = useState(true);
 
   const [barChartData, setBarChartData] = useState({
     labels: [],
@@ -38,7 +40,7 @@ const StatisticsPage = ({ accountId }) => {
 
   useEffect(() => {
     axios
-      .post(`http://localhost:5000/api/account/${accountId.accountId}`)
+      .post(`https://ricrym-be.onrender.com/api/account/${accountId.accountId}`)
       .then((response) => {
         const characters = response?.data?.characters || [];
         if (Array.isArray(characters)) {
@@ -72,9 +74,11 @@ const StatisticsPage = ({ accountId }) => {
         } else {
           console.error("Characters is not an array or is undefined.");
         }
+        setIsLoading(false);
       })
       .catch((error) => {
         console.error("Error fetching account data:", error);
+        setIsLoading(false);
       });
   }, [accountId]);
 
@@ -126,7 +130,11 @@ const StatisticsPage = ({ accountId }) => {
 
       {/* Charts Section */}
       <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
+        {
+          isLoading ? <LoadingComponet/>
+          :
+          <>
+          <Grid item xs={12} md={8}>
           <Card>
             <CardContent sx={{ height: { xs: "300px", md: "400px" } }}>
               <Typography variant="h6" gutterBottom>
@@ -150,6 +158,9 @@ const StatisticsPage = ({ accountId }) => {
             </CardContent>
           </Card>
         </Grid>
+          </>
+        }
+
       </Grid>
     </Box>
   );

@@ -29,7 +29,7 @@ const TwoFactorAuth = ({accountId}) => {
   const [isSuccess,setIsSuccess] = useState(false)
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/generate-qr/${accountId}`)
+    axios.get(`https://ricrym-be.onrender.com/api/generate-qr/${accountId}`)
   .then(function (response) {
     // handle success
     console.log(response);
@@ -52,7 +52,7 @@ const TwoFactorAuth = ({accountId}) => {
     const data = new FormData(event.currentTarget);
     
     axios
-      .post('http://localhost:5000/api/2fa', {
+      .post('https://ricrym-be.onrender.com/api/2fa', {
         accountId: accountId, // Account ID from your state
         token: data.get("token"), // Token from the input field
       })

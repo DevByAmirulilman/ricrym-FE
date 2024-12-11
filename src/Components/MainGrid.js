@@ -18,14 +18,14 @@ import avatarWarrior from "../images/warrior.png";
 import avatarMage from "../images/mage.jpg";
 import avatarArcher from "../images/archer.jpg";
 import avatarHealer from "../images/healer.jpg";
+import LoadingComponet from "./LoadingComponet";
 
 export default function MainGrid() {
   const [selectedPlayerId, setSelectedPlayerId] = useState(null);
   const [characters, setCharacters] = useState([]);
-  const [selectedCharacter,setSelectedCharacter] = useState()
-
+  const [selectedCharacter, setSelectedCharacter] = useState();
+  const [isLoading, setIsLoading] = useState(true);
   const sessionId = localStorage.getItem("session_id");
-  console.log(sessionId);
 
   const handleCharacterChange = (event) => {
     const selectedId = event.target.value; // Get the value of the selected radio
@@ -39,15 +39,18 @@ export default function MainGrid() {
   };
 
   useEffect(() => {
+    setIsLoading(true); // Start loading when the request is made
     axios
-      .get("http://localhost:5000/api/all-characters")
+      .get("https://ricrym-be.onrender.com/api/all-characters")
       .then((response) => {
-        setCharacters(response.data);
+        setCharacters(response.data);  // Set characters when data is received
+        setIsLoading(false);  // Set loading to false when data is fetched
       })
       .catch((error) => {
         console.error(error);
+        setIsLoading(false); // Stop loading even if the request fails
       });
-  }, []);
+  }, []);  // Empty array ensures this effect runs only once on component mount
 
   const avatarMapping = {
     1: avatarWarrior,
@@ -77,74 +80,18 @@ export default function MainGrid() {
       <Grid container spacing={2} justifyContent="center">
         <Grid item xs={12} sm={10} lg={8}>
           <Card sx={{ border: "2px solid black", p: 2 }}>
-            <LeaderBoard
-              overAllLeaderboard={true}
-              selectedPlayerId={selectedPlayerId}
-              selectPlayer={selectPlayer}
-            />
+            {isLoading ? (
+              <LoadingComponet />
+            ) : (
+              <LeaderBoard
+                overAllLeaderboard={true}
+                selectedPlayerId={selectedPlayerId}
+                selectPlayer={selectPlayer}
+              />
+            )}
           </Card>
         </Grid>
       </Grid>
-
-      {/* Hero Leaderboard Title */}
-      {/* <Box
-        sx={{
-          mt: 4,
-          mb: 4,
-          p: 2,
-          textAlign: "center",
-          border: "2px solid black",
-        }}
-      >
-        <Typography component="h2" variant="h6">
-          Heroes Leaderboard
-        </Typography>
-        <Typography variant="body2">Leaderboard based on heroes</Typography>
-      </Box>
-
-      Characters Filter
-      <Grid container justifyContent="center">
-        <Grid item xs={12} sm={10} lg={8}>
-          <FormControl fullWidth>
-            <FormLabel id="demo-radio-buttons-group-label">Heroes</FormLabel>
-            <RadioGroup
-              aria-labelledby="demo-radio-buttons-group-label"
-              defaultValue="female"
-              name="radio-buttons-group"
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                gap: 2,
-              }}
-              onChange={handleCharacterChange}
-            >
-              {characters.map((character, index) => (
-                <FormControlLabel
-                  key={index}
-                  value={character.class_id}
-                  control={<Radio />}
-                  label={character.class_name}
-                  onClick={console.log(character.class_id)}
-                />
-              ))}
-            </RadioGroup>
-          </FormControl>
-        </Grid>
-      </Grid> */}
-
-      {/* Hero Leaderboard */}
-      {/* <Grid container spacing={2} justifyContent="center" sx={{ mt: 4 }}>
-        <Grid item xs={12} sm={10} lg={8}>
-          <Card sx={{ border: "2px solid black", p: 2 }}>
-            <LeaderBoard
-              overAllLeaderboard={false}
-              selectedPlayerId={selectedPlayerId}
-              selectPlayer={selectPlayer}
-            />
-          </Card>
-        </Grid>
-      </Grid> */}
     </Box>
   );
 }

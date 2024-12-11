@@ -10,9 +10,10 @@ import {
   TextField,
 } from "@mui/material";
 import axios from "axios";
+import LoadingComponet from "./LoadingComponet";
 
-export const LeaderBoard = ({ characterId,overAllLeaderboard }) => {
-  const [playersByRole, setPlayersByRole] = useState([])
+export const LeaderBoard = ({ characterId, overAllLeaderboard }) => {
+  const [playersByRole, setPlayersByRole] = useState([]);
   const [players, setPlayers] = useState([]); // State for players
   const [searchQuery, setSearchQuery] = useState(""); // Search query
   const [totalPlayers, setTotalPlayers] = useState(0); // Total players count
@@ -21,13 +22,14 @@ export const LeaderBoard = ({ characterId,overAllLeaderboard }) => {
   const [sortBy, setSortBy] = useState("totalScore"); // Sort field
   const [order, setOrder] = useState("desc"); // Sort order
   const sessionId = localStorage.getItem("session_id");
-  const [selectedPlayer,setSelectedPlayer] = useState()
-  
+  const [selectedPlayer, setSelectedPlayer] = useState();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/all-accounts-scoreboard", {
+        setIsLoading(true); // Start loading when new search or pagination is triggered
+        const response = await axios.get("https://ricrym-be.onrender.com/api/all-accounts-scoreboard", {
           params: {
             search: searchQuery,
             page: page + 1, 
@@ -41,31 +43,12 @@ export const LeaderBoard = ({ characterId,overAllLeaderboard }) => {
         });
         setPlayers(response.data.data); 
         setTotalPlayers(response.data.total); 
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching leaderboard:", error);
+        setIsLoading(false);
       }
     };
-
-    const fetchPlayersByRole = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/all-accounts-by-character", {
-          params: {
-            classId: 1, // Ensure classId is passed as an integer or the correct type
-          },
-          headers: {
-            Authorization: sessionId, // Ensure the sessionId is valid
-          },
-        });
-    
-        // Check the response to see if the data is coming back as expected
-        setPlayersByRole(response.data)
-      } catch (error) {
-        console.error("Error fetching leaderboard:", error);
-      }
-    };
-    
-    
-    fetchPlayersByRole()
     fetchPlayers();
   }, [searchQuery, page, rowsPerPage, sortBy, order, sessionId]); 
 
@@ -76,12 +59,12 @@ export const LeaderBoard = ({ characterId,overAllLeaderboard }) => {
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); 
+    setPage(0); // Reset to page 0 when rows per page changes
   };
 
   const renderList = () => (
     <>
-        <List>
+      <List>
         {players.map((player) => {
           const style = selectedPlayer === player._id ? { backgroundColor: "#eee" } : {};
           return (
@@ -101,9 +84,9 @@ export const LeaderBoard = ({ characterId,overAllLeaderboard }) => {
             </ListItem>
           );
         })}
-        </List>
-        {/* Pagination */}
-        <TablePagination
+      </List>
+      {/* Pagination */}
+      <TablePagination
         component="div"
         count={totalPlayers}
         page={page}
@@ -111,43 +94,7 @@ export const LeaderBoard = ({ characterId,overAllLeaderboard }) => {
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
         rowsPerPageOptions={[5, 10, 25]}
-        />
-    </>
-  );
-  
-  const renderListByRole = () => (
-    <>
-        <List>
-        {playersByRole.map((player) => {
-          const style = selectedPlayer === player.account._id ? { backgroundColor: "#eee" } : {};
-          return (
-            <ListItem
-              key={player.account._id}
-              onClick={() => setSelectedPlayer(player.account._id)}
-              style={style}
-              button
-            >
-              <ListItemAvatar>
-                <Avatar src={player.account.avatar?.url || "/default-avatar.png"} alt={player.account.username} />
-              </ListItemAvatar>
-              <ListItemText
-                primary={`${player.account.username}`}
-                secondary={`Score: ${player.char.score.reward_score}`}
-              />
-            </ListItem>
-          );
-        })}
-        </List>
-        {/* Pagination */}
-        <TablePagination
-        component="div"
-        count={totalPlayers}
-        page={page}
-        onPageChange={handleChangePage}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPageOptions={[5, 10, 25]}
-        />
+      />
     </>
   );
 
@@ -163,13 +110,8 @@ export const LeaderBoard = ({ characterId,overAllLeaderboard }) => {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </Box>
-      
-      {
-        overAllLeaderboard ? renderList():renderListByRole()
-      }
-     
 
-
+      {isLoading ? <LoadingComponet /> : renderList()}
     </Box>
   );
 };

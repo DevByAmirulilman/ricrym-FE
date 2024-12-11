@@ -1,22 +1,37 @@
 import React, { useEffect, useState } from "react";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { LeaderBoard } from "./LeaderBoard";
-import { Avatar, Card, CardHeader } from "@mui/material";
+import {
+  Avatar,
+  Card,
+  CardHeader,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  Radio,
+  RadioGroup,
+} from "@mui/material";
 import axios from "axios";
 import avatarWarrior from "../images/warrior.png";
-import avatarMage from '../images/mage.jpg'
-import avatarArcher from '../images/archer.jpg'
-import avatarHealer from '../images/healer.jpg'
+import avatarMage from "../images/mage.jpg";
+import avatarArcher from "../images/archer.jpg";
+import avatarHealer from "../images/healer.jpg";
 
 export default function MainGrid() {
   const [selectedPlayerId, setSelectedPlayerId] = useState(null);
   const [characters, setCharacters] = useState([]);
-  const [players,setPlayers] = useState()
+  const [selectedCharacter,setSelectedCharacter] = useState()
 
-  
+  const sessionId = localStorage.getItem("session_id");
+  console.log(sessionId);
+
+  const handleCharacterChange = (event) => {
+    const selectedId = event.target.value; // Get the value of the selected radio
+    setSelectedCharacter(selectedId); // Update the state with the selected class_id
+    console.log("Selected Character ID:", selectedId);
+  };
 
   const selectPlayer = (playerId) => {
     setSelectedPlayerId(playerId);
@@ -42,62 +57,94 @@ export default function MainGrid() {
   };
 
   return (
-    <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: "1700px",
+        margin: "0 auto", // Center the container horizontally
+        padding: 2, // Add some padding for spacing
+      }}
+    >
       {/* Title */}
-      <Box sx={{ mb: 2, border:'2px solid black', p:2}}>
-      <Typography component="h2" variant="h6" >
-        Leaderboard
-      </Typography>
-      <Typography  variant="body2" >
-        Overall Leaderboard
-      </Typography>
+      <Box sx={{ mb: 4, p: 2, textAlign: "center", border: "2px solid black" }}>
+        <Typography component="h2" variant="h6">
+          Leaderboard
+        </Typography>
+        <Typography variant="body2">Overall Leaderboard</Typography>
       </Box>
 
-
-      {/* Character Cards */}
-      <Grid container spacing={2}>
-          <Grid item xs={12} sm={12} lg={12}>
-            <Card sx={{ border:'2px solid black'}}>
-              <LeaderBoard
-                overAllLeaderboard={true}
-                selectedPlayerId={selectedPlayerId}
-                selectPlayer={selectPlayer}
-              />
-            </Card>
-          </Grid>
+      {/* Overall Leaderboard */}
+      <Grid container spacing={2} justifyContent="center">
+        <Grid item xs={12} sm={10} lg={8}>
+          <Card sx={{ border: "2px solid black", p: 2 }}>
+            <LeaderBoard
+              overAllLeaderboard={true}
+              selectedPlayerId={selectedPlayerId}
+              selectPlayer={selectPlayer}
+            />
+          </Card>
+        </Grid>
       </Grid>
 
-      
-      <Box sx={{ mt:2 ,mb: 2, border:'2px solid black', p:2}}>
-      <Typography component="h2" variant="h6" >
-        Heroes Leaderboard
-      </Typography>
-      <Typography  variant="body2" >
-        Leaderboard based on heroes
-      </Typography>
+      {/* Hero Leaderboard Title */}
+      {/* <Box
+        sx={{
+          mt: 4,
+          mb: 4,
+          p: 2,
+          textAlign: "center",
+          border: "2px solid black",
+        }}
+      >
+        <Typography component="h2" variant="h6">
+          Heroes Leaderboard
+        </Typography>
+        <Typography variant="body2">Leaderboard based on heroes</Typography>
       </Box>
-      <Grid container spacing={2}>
-        {characters.map((character, index) => (
-          <Grid item key={character.class_id} xs={12} sm={6} lg={6}>
-            <Card sx={{ border:'2px solid black'}}>
-              <CardHeader
-                title={character.class_name}
-                avatar={<Avatar src={avatarMapping[character.class_id]} alt={character.class_name} />}
-                titleTypographyProps={{
-                    variant: 'h5', // Set the typography variant to make the text bigger
-                    sx: { fontWeight: 'bold' }, // Optional: Add bold styling
-                  }}
-                  sx={{borderBottom:'2px solid black'}}
-              />
-              <LeaderBoard
-                characterId={character._id}
-                selectedPlayerId={selectedPlayerId}
-                selectPlayer={selectPlayer}
-              />
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+
+      Characters Filter
+      <Grid container justifyContent="center">
+        <Grid item xs={12} sm={10} lg={8}>
+          <FormControl fullWidth>
+            <FormLabel id="demo-radio-buttons-group-label">Heroes</FormLabel>
+            <RadioGroup
+              aria-labelledby="demo-radio-buttons-group-label"
+              defaultValue="female"
+              name="radio-buttons-group"
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                gap: 2,
+              }}
+              onChange={handleCharacterChange}
+            >
+              {characters.map((character, index) => (
+                <FormControlLabel
+                  key={index}
+                  value={character.class_id}
+                  control={<Radio />}
+                  label={character.class_name}
+                  onClick={console.log(character.class_id)}
+                />
+              ))}
+            </RadioGroup>
+          </FormControl>
+        </Grid>
+      </Grid> */}
+
+      {/* Hero Leaderboard */}
+      {/* <Grid container spacing={2} justifyContent="center" sx={{ mt: 4 }}>
+        <Grid item xs={12} sm={10} lg={8}>
+          <Card sx={{ border: "2px solid black", p: 2 }}>
+            <LeaderBoard
+              overAllLeaderboard={false}
+              selectedPlayerId={selectedPlayerId}
+              selectPlayer={selectPlayer}
+            />
+          </Card>
+        </Grid>
+      </Grid> */}
     </Box>
   );
 }

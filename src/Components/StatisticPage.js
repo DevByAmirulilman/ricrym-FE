@@ -9,6 +9,8 @@ import axios from "axios";
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend, ArcElement);
 
 const StatisticsPage = ({ accountId }) => {
+  const sessionId = localStorage.getItem("session_id");
+
   const [barChartData, setBarChartData] = useState({
     labels: [],
     datasets: [

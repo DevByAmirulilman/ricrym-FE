@@ -17,6 +17,8 @@ const mainListItems = [
   { text: 'My Stats', icon: <AnalyticsRoundedIcon />, component: 'StatisticsPage ' },
   { text: 'Heroes', icon: <PeopleRoundedIcon />, component: 'CommingSoon' },
   { text: 'Tasks', icon: <AssignmentRoundedIcon />, component: 'CommingSoon' },
+  { text: 'Admin', icon: <AssignmentRoundedIcon />, component: 'CommingSoon' },
+
 ];
 
 const secondaryListItems = [

@@ -1,69 +1,73 @@
 import React, { useEffect, useState } from "react";
 import {
   Avatar,
+  Box,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
-  ListSubheader,
   TablePagination,
+  TextField,
 } from "@mui/material";
 import axios from "axios";
 
-export const LeaderBoard = ({ overAllLeaderboard, characterId, selectedPlayerId, selectPlayer }) => {
-  const [players, setPlayers] = useState([]);
-  const [allPlayers, setAllPlayers] = useState([]);
-
-  // Pagination states
+export const LeaderBoard = ({ characterId,overAllLeaderboard }) => {
+  const [playersByRole, setPlayersByRole] = useState([])
+  const [players, setPlayers] = useState([]); // State for players
+  const [searchQuery, setSearchQuery] = useState(""); // Search query
+  const [totalPlayers, setTotalPlayers] = useState(0); // Total players count
   const [page, setPage] = useState(0); // Current page
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Number of items per page
+  const [rowsPerPage, setRowsPerPage] = useState(10); // Items per page
+  const [sortBy, setSortBy] = useState("totalScore"); // Sort field
+  const [order, setOrder] = useState("desc"); // Sort order
+  const sessionId = localStorage.getItem("session_id");
+  const [selectedPlayer,setSelectedPlayer] = useState()
+  
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/all-accounts")
-      .then((response) => {
-        const allPlayers = response.data;
-
-        // Flatten characters to include score and class association with player data
-        const playersWithScores = [];
-        allPlayers.forEach((player) => {
-          player.characters.forEach((char) => {
-            if (char.character._id === characterId) {
-              playersWithScores.push({
-                playerId: player._id,
-                username: player.username,
-                avatar: player.avatar?.url,
-                score: char.score.reward_score,
-              });
-            }
-          });
+    const fetchPlayers = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/all-accounts-scoreboard", {
+          params: {
+            search: searchQuery,
+            page: page + 1, 
+            limit: rowsPerPage,
+            sortBy,
+            order,
+          },
+          headers: {
+            Authorization: sessionId,
+          },
         });
+        setPlayers(response.data.data); 
+        setTotalPlayers(response.data.total); 
+      } catch (error) {
+        console.error("Error fetching leaderboard:", error);
+      }
+    };
 
-        const overallScoreboard = [];
-        allPlayers.forEach((player) => {
-          const totalScore = player.characters.reduce(
-            (sum, char) => sum + char.score.reward_score,
-            0
-          );
-          overallScoreboard.push({
-            playerId: player._id,
-            username: player.username,
-            avatar: player.avatar?.url,
-            email: player.email,
-            totalScore,
-          });
+    const fetchPlayersByRole = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/all-accounts-by-character", {
+          params: {
+            classId: 1, // Ensure classId is passed as an integer or the correct type
+          },
+          headers: {
+            Authorization: sessionId, // Ensure the sessionId is valid
+          },
         });
-
-        // Sort players by score in descending order
-        playersWithScores.sort((a, b) => b.score - a.score);
-        overallScoreboard.sort((a, b) => b.totalScore - a.totalScore);
-        setAllPlayers(overallScoreboard);
-        setPlayers(playersWithScores);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }, [characterId]);
+    
+        // Check the response to see if the data is coming back as expected
+        setPlayersByRole(response.data)
+      } catch (error) {
+        console.error("Error fetching leaderboard:", error);
+      }
+    };
+    
+    
+    fetchPlayersByRole()
+    fetchPlayers();
+  }, [searchQuery, page, rowsPerPage, sortBy, order, sessionId]); 
 
   // Handle pagination change
   const handleChangePage = (event, newPage) => {
@@ -72,53 +76,100 @@ export const LeaderBoard = ({ overAllLeaderboard, characterId, selectedPlayerId,
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Reset to first page
+    setPage(0); 
   };
 
-  // Paginated data
-  const displayedPlayers = overAllLeaderboard
-    ? allPlayers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-    : players.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-
-  return (
-    <div className="leaderboard">
-      <List>
-        {displayedPlayers.map((player, index) => {
-          const style =
-            selectedPlayerId === player.playerId ? { backgroundColor: "#eee" } : {};
-
+  const renderList = () => (
+    <>
+        <List>
+        {players.map((player) => {
+          const style = selectedPlayer === player._id ? { backgroundColor: "#eee" } : {};
           return (
             <ListItem
-              key={player.playerId}
-              onClick={() => selectPlayer(player.playerId)}
+              key={player._id}
+              onClick={() => setSelectedPlayer(player._id)}
               style={style}
-              button // Makes the item clickable
+              button
             >
               <ListItemAvatar>
-                <Avatar src={player.avatar || "/default-avatar.png"} alt={player.username} />
+                <Avatar src={player.avatar?.url || "/default-avatar.png"} alt={player.username} />
               </ListItemAvatar>
               <ListItemText
-                primary={`${player.username}`}
-                secondary={`Score: ${
-                  overAllLeaderboard ? player.totalScore : player.score
-                }`}
+                primary={`${player.rank}.${player.username}`}
+                secondary={`Score: ${player.totalScore || player.score}`}
               />
-                <ListSubheader>{index + 1 + page * rowsPerPage}</ListSubheader>
             </ListItem>
           );
         })}
-      </List>
-
-      {/* Pagination Component */}
-      <TablePagination
+        </List>
+        {/* Pagination */}
+        <TablePagination
         component="div"
-        count={overAllLeaderboard ? allPlayers.length : players.length} // Total number of items
+        count={totalPlayers}
         page={page}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPageOptions={[5, 10, 25]} // Rows per page options
-      />
-    </div>
+        rowsPerPageOptions={[5, 10, 25]}
+        />
+    </>
+  );
+  
+  const renderListByRole = () => (
+    <>
+        <List>
+        {playersByRole.map((player) => {
+          const style = selectedPlayer === player.account._id ? { backgroundColor: "#eee" } : {};
+          return (
+            <ListItem
+              key={player.account._id}
+              onClick={() => setSelectedPlayer(player.account._id)}
+              style={style}
+              button
+            >
+              <ListItemAvatar>
+                <Avatar src={player.account.avatar?.url || "/default-avatar.png"} alt={player.account.username} />
+              </ListItemAvatar>
+              <ListItemText
+                primary={`${player.account.username}`}
+                secondary={`Score: ${player.char.score.reward_score}`}
+              />
+            </ListItem>
+          );
+        })}
+        </List>
+        {/* Pagination */}
+        <TablePagination
+        component="div"
+        count={totalPlayers}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[5, 10, 25]}
+        />
+    </>
+  );
+
+  return (
+    <Box className="leaderboard">
+      {/* Search Input */}
+      <Box sx={{ mb: 2 }}>
+        <TextField
+          label="Search Players"
+          variant="outlined"
+          fullWidth
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </Box>
+      
+      {
+        overAllLeaderboard ? renderList():renderListByRole()
+      }
+     
+
+
+    </Box>
   );
 };

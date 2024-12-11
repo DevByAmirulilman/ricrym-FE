@@ -105,6 +105,8 @@ export default function SignIn() {
       })
       .then(function (response) {
         setAccountId(response?.data.account_id);
+        const sessionId = response.data.session_id; // Assume `session_id` is returned from login API
+        localStorage.setItem('session_id', sessionId);
         setIsTwoFactorRequired(true); // Enable 2FA view
       })
       .catch(function (error) {
